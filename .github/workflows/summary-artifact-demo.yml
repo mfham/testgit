@@ -1,0 +1,38 @@
+name: Summary artifact demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 表示するメッセージ
+        required: false
+        default: artifactとしても保存するサンプルです
+
+permissions:
+  contents: read
+
+jobs:
+  write-and-upload-summary:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Write summary and artifact file
+        env:
+          MESSAGE: ${{ inputs.message }}
+        run: |
+          {
+            echo "## :speech_balloon: サンプルコメント"
+            echo ""
+            echo "> ${MESSAGE}"
+            echo ""
+            echo "- 実行ID: \`${{ github.run_id }}\`"
+            echo "- 再試行回数: \`${{ github.run_attempt }}\`"
+            echo "- 実行日時 (UTC): \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\`"
+          } | tee summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload summary artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: workflow-summary
+          path: summary.md
+          if-no-files-found: error
+          retention-days: 7
