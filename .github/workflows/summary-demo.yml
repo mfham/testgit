@@ -1,0 +1,29 @@
+name: Summary demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 表示するメッセージ
+        required: false
+        default: 手動実行したサンプルです
+
+permissions:
+  contents: read
+
+jobs:
+  write-summary:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Write sample summary
+        env:
+          MESSAGE: ${{ inputs.message }}
+        run: |
+          {
+            echo "## :speech_balloon: サンプルコメント"
+            echo ""
+            echo "> ${MESSAGE}"
+            echo ""
+            echo "- 実行ID: \`${{ github.run_id }}\`"
+            echo "- 実行日時 (UTC): \`$(date -u '+%Y-%m-%dT%H:%M:%SZ')\`"
+          } >> "$GITHUB_STEP_SUMMARY"
